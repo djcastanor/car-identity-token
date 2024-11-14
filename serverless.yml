@@ -1,0 +1,40 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: davidj3311
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: token-generator
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: token-generator
+
+custom:
+  wsgi:
+    app: app.app
+
+provider:
+  name: aws
+  runtime: python3.12
+
+functions:
+  api:
+    handler: wsgi_handler.handler
+    events:
+      - http:
+          path: /
+          method: ANY
+      - http:
+          path: /{proxy+}
+          method: ANY
+
+  tokenGenerator: 
+    handler: token_generator.handler
+    environment:
+      JWT_SECRET: ${env:JWT_SECRET, 'rt3AQdMUlNKyMmNKzPlXqVBqNQ2cEuz6lalgPSgVFTk='}
+      AUTHORIZED_USERNAME: ${env:AUTHORIZED_USERNAME, 'djcastanor'}
+      AUTHORIZED_PASSWORD: ${env:AUTHORIZED_PASSWORD, '123456'}
+    events:
+      - http:
+          path: tokengenerate
+          method: post
+
+plugins:
+  - serverless-wsgi
+  - serverless-python-requirements
